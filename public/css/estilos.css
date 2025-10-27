@@ -21,7 +21,8 @@
   --color-error: #ef4444;
 
   /* Typography */
-  --font-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
 
   /* Spacing */
   --spacing-xs: 0.5rem;
@@ -52,6 +53,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: var(--spacing-md);
+  padding-top: 70px;
 }
 
 /* ============================================
@@ -97,6 +99,23 @@ body {
 }
 
 .login input[type="text"]::placeholder {
+  color: var(--color-secondary);
+}
+
+.login input[type="password"] {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  transition: all 0.2s ease;
+  margin-bottom: var(--spacing-md);
+  font-family: var(--font-primary);
+}
+
+.login input[type="password"]::placeholder {
   color: var(--color-secondary);
 }
 
@@ -362,6 +381,19 @@ tbody td:first-child {
     padding: 0.75rem 1rem;
     font-size: 0.875rem;
   }
+  .navbar-container {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .navbar-logo {
+    font-size: 1.125rem;
+  }
+
+  .navbar-btn {
+    width: 100%;
+    text-align: center;
+  }
 }
 
 @media (max-width: 480px) {
@@ -401,4 +433,50 @@ tbody td:first-child {
   background: #5a626c; /* Un gris un poco más oscuro */
 }
 
-/* Estilos adicionales para el navBar */
+/* ============================================
+   NAVBAR
+   ============================================ */
+.navbar {
+  width: 100%;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-sm) var(--spacing-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-logo {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  letter-spacing: -0.02em;
+}
+
+.navbar-btn {
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.625rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.navbar-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}

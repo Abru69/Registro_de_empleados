@@ -7,7 +7,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-  
+ 
+  <nav class="navbar">
+    <div class="navbar-container">
+      <h1 class="navbar-logo"></h1>
+      <a href="app/views/login.php" class="navbar-btn">Iniciar sesión</a>
+    </div>
+  </nav>
 
   <div class="login">
     <h2>Registro de Asistencia</h2>

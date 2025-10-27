@@ -21,6 +21,14 @@ $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <link rel="stylesheet" href="../../public/css/estilos.css">
 </head>
 <body>
+
+<nav class="navbar">
+  <div class="navbar-container">
+    <h1 class="navbar-logo"></h1>
+    <a href="../models/logout.php" class="navbar-btn">Cerrar sesión</a>
+  </div>
+</nav>
+
   <div class="panel">
     <h2>📋 Registros de Asistencia</h2>
     <form method="GET">
