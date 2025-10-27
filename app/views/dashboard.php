@@ -1,5 +1,5 @@
 <?php
-include 'db.php';
+include '../../config/db.php';
 date_default_timezone_set('America/Mexico_City');
 
 $filtro = $_GET['fecha'] ?? '';
@@ -18,7 +18,7 @@ $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta charset="UTF-8">
   <title>Panel de Asistencias</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/estilos.css">
+  <link rel="stylesheet" href="../../public/css/estilos.css">
 </head>
 <body>
   <div class="panel">
