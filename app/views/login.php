@@ -29,13 +29,13 @@ require '../models/loginModel.php';
           type="text"
           name="usuario"
           placeholder="Usuario"
-          value="admin"
+          
           required
         />
         <input
           type="password"
           name="password"
-          value="sudo"
+         
           placeholder="Contraseña"
           required
         />

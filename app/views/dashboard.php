@@ -1,4 +1,7 @@
 <?php
+require_once '../middleware/auth_check.php';
+requireAuth();
+
 include '../../config/db.php';
 date_default_timezone_set('America/Mexico_City');
 
