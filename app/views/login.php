@@ -2,7 +2,15 @@
 session_start();
 require '../../config/db.php';
 require '../models/loginModel.php';
+require_once '../middleware/auth_check.php';
 
+//si tiene sesion activa, redirigir al dashboard
+blockIfAuthenticated();
+
+// Evitar cachear esta página (importante para el botón Atrás)
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
 ?>
 
 <!DOCTYPE html>
@@ -29,13 +37,13 @@ require '../models/loginModel.php';
           type="text"
           name="usuario"
           placeholder="Usuario"
-          
+         
           required
         />
         <input
           type="password"
           name="password"
-         
+          
           placeholder="Contraseña"
           required
         />

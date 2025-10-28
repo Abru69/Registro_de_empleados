@@ -5,6 +5,11 @@ requireAuth();
 include '../../config/db.php';
 date_default_timezone_set('America/Mexico_City');
 
+// Evitar cache en páginas protegidas
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 $filtro = $_GET['fecha'] ?? '';
 if ($filtro) {
   // La consulta SELECT * ya tomará la nueva columna
