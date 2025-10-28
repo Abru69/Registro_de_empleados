@@ -20,14 +20,25 @@ header('Expires: 0');
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Iniciar Sesión</title>
     <link rel="stylesheet" href="../../public/css/estilos.css" />
+    <link rel="stylesheet" href="../../public/css/navbar.css">
+
   </head>
   <body>
 
-    <nav class="navbar">
-      <div class="navbar-container">
-        <a href="../../index.php" class="navbar-logo">Atras</a>
+  <nav class="navbar login-navbar" id="navbar">
+    <div class="navbar-container">
+      <a href="../../index.php" class="navbar-logo">Menu</a>
+
+      <button class="navbar-toggle" id="navbarToggle" aria-label="Menú" aria-expanded="false">
+        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+      </button>
+
+      <div class="navbar-actions" id="navbarMenu">
+        <a href="../../index.php" class="navbar-link back-btn">← Atrás</a>
+        <a href="login.php" class="navbar-link active">Iniciar Sesión</a>
       </div>
-    </nav>
+    </div>
+  </nav>
 
     <div class="login">
       <h2>Iniciar Sesión</h2>
@@ -63,5 +74,6 @@ header('Expires: 0');
         <a href="registro.php" class="login-enlace">Regístrate aquí</a>
       </p> -->
     </div>
+    <script src="../../public/js/navbar.js" defer></script>
   </body>
 </html>
