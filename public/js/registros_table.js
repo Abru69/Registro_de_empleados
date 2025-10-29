@@ -11,6 +11,41 @@
   let autoRefreshInterval = null;
   let lastDataSignature = null;
 
+  // Componente personalizado de Loading
+  class CustomLoadingOverlay {
+    init(params) {
+      this.eGui = document.createElement("div");
+      this.eGui.innerHTML = `
+                <div class="ag-overlay-loading-center">
+                    <div class="custom-loading-spinner"></div>
+                    <div class="custom-loading-text">${params.loadingMessage}</div>
+                </div>
+            `;
+    }
+
+    getGui() {
+      return this.eGui;
+    }
+  }
+
+  class CustomNoRowsOverlay {
+    init(params) {
+      this.eGui = document.createElement("div");
+      this.eGui.innerHTML = `
+                <div class="ag-overlay-no-rows-center">
+                    <span class="custom-no-data-icon">📋</span>
+                    <div class="custom-no-data-message">
+                        ${params.noRowsMessageFunc()}
+                    </div>
+                </div>
+            `;
+    }
+
+    getGui() {
+      return this.eGui;
+    }
+  }
+
   // Configuración de columnas de AG-Grid (SIN floating filters)
   const columnDefs = [
     {
@@ -73,6 +108,17 @@
     domLayout: "normal",
     rowData: [],
     suppressColumnVirtualisation: true,
+    // Configuración del loading overlay personalizado
+    loadingOverlayComponentParams: {
+      loadingMessage: "Filtrando registros...",
+    },
+    // Configuración del mensaje sin datos
+    noRowsOverlayComponent: CustomNoRowsOverlay,
+    noRowsOverlayComponentParams: {
+      noRowsMessageFunc: function () {
+        return "No hay registros para mostrar";
+      },
+    },
     localeText: {
       page: "Página",
       more: "Más",
@@ -136,6 +182,13 @@
   async function loadData(silent = false) {
     const url = buildURL();
 
+    if (!silent) {
+      try {
+        gridApi.showLoadingOverlay();
+      } catch (_) {}
+      if (window.LoaderManager) LoaderManager.show("Porfavor espere...");
+    }
+
     try {
       const response = await fetch(url, { cache: "no-store" });
 
@@ -161,14 +214,29 @@
         gridApi.setGridOption("rowData", rows);
         lastDataSignature = currentSignature;
 
+        // Si no hay datos, mostrar overlay de "sin datos"
+        if (rows.length === 0) {
+          gridApi.showNoRowsOverlay();
+        } else {
+          gridApi.hideOverlay();
+        }
+
         setTimeout(() => {
           gridApi.sizeColumnsToFit();
         }, 100);
+      } else {
+        if (rows.length > 0) {
+          gridApi.hideOverlay();
+        }
       }
     } catch (error) {
       console.error("Error al cargar datos:", error);
       if (!silent) {
         gridApi.setGridOption("rowData", []);
+      }
+    } finally {
+      if (!silent && window.LoaderManager) {
+        LoaderManager.hide();
       }
     }
   }

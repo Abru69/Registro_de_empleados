@@ -52,6 +52,7 @@ try {
   <link rel="stylesheet" href="../../public/css/estilos.css">
   <link rel="stylesheet" href="../../public/css/navbar.css">
   <link rel="stylesheet" href="../../public/css/tabla.css">
+  <link rel="stylesheet" href="../../public/css/loader.css">
   <link rel="icon" type="image/x-icon" href="../../public/img/favicon.ico">
 
   <!-- AG-Grid CSS -->
@@ -59,6 +60,7 @@ try {
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.3/styles/ag-theme-alpine.css">
 
 </head>
+
 <body>
 
   <nav class="navbar" id="navbar">
@@ -141,32 +143,40 @@ try {
         </div>
         <div id="weeklyGrid" class="ag-theme-alpine grid-container"></div>
 
-     
-      <script>
-        function openTab(evt, tabName) {
-          const tabContents = document.getElementsByClassName("tab-content");
-          for (let i = 0; i < tabContents.length; i++) {
-            tabContents[i].classList.remove("active");
+        <div id="loadingOverlay" class="loading-overlay">
+          <div class="loading-container">
+            <div class="spinner"></div>
+            <p class="loading-text">Cargando datos...</p>
+          </div>
+        </div>
+
+        <script>
+          function openTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+              tabContents[i].classList.remove("active");
+            }
+
+            const tabButtons = document.getElementsByClassName("tab-button");
+            for (let i = 0; i < tabButtons.length; i++) {
+              tabButtons[i].classList.remove("active");
+            }
+
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
           }
+        </script>
 
-          const tabButtons = document.getElementsByClassName("tab-button");
-          for (let i = 0; i < tabButtons.length; i++) {
-            tabButtons[i].classList.remove("active");
-          }
-
-          document.getElementById(tabName).classList.add("active");
-          evt.currentTarget.classList.add("active");
-        }
-      </script>
-
-      <div id=" probe" data-url="../api/attendance_rows.php<?= $filtro ? '?fecha=' . urlencode($filtro) : '' ?>"></div>
-      <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.3/dist/ag-grid-community.min.js"></script>
-
-      <script src="../../public/js/navbar.js" defer></script>
-      <script src="../../public/js/attendance_poll.js" defer></script>
-      <script src="../../public/js/registros_table.js" defer></script>
-      <script src="../../public/js/weekly_hours_table.js" defer></script>
+        <div id=" probe" data-url="../api/attendance_rows.php<?= $filtro ? '?fecha=' . urlencode($filtro) : '' ?>"></div>
+        <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.3/dist/ag-grid-community.min.js"></script>
+        
+        <script src="../../public/js/loader.js" defer></script>
+        <script src="../../public/js/navbar.js" defer></script>
+        <script src="../../public/js/attendance_poll.js" defer></script>
+        <script src="../../public/js/registros_table.js" defer></script>
+        <script src="../../public/js/weekly_hours_table.js" defer></script>
 
 
 </body>
+
 </html>

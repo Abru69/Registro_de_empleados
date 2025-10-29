@@ -8,6 +8,42 @@
   let autoRefreshInterval = null;
   let lastDataSignature = null;
 
+  // Componente personalizado de Loading
+  class CustomLoadingOverlay {
+    init(params) {
+      this.eGui = document.createElement("div");
+      this.eGui.innerHTML = `
+                <div class="ag-overlay-loading-center">
+                    <div class="custom-loading-spinner"></div>
+                    <div class="custom-loading-text">${params.loadingMessage}</div>
+                </div>
+            `;
+    }
+
+    getGui() {
+      return this.eGui;
+    }
+  }
+
+  // Componente personalizado de No Rows
+  class CustomNoRowsOverlay {
+    init(params) {
+      this.eGui = document.createElement("div");
+      this.eGui.innerHTML = `
+                <div class="ag-overlay-no-rows-center">
+                    <span class="custom-no-data-icon"></span>
+                    <div class="custom-no-data-message">
+                        ${params.noRowsMessageFunc()}
+                    </div>
+                </div>
+            `;
+    }
+
+    getGui() {
+      return this.eGui;
+    }
+  }
+
   const columnDefs = [
     {
       field: "nombre",
@@ -65,6 +101,12 @@
     domLayout: "normal",
     rowData: [],
     suppressColumnVirtualisation: true,
+
+    loadingOverlayComponent: CustomLoadingOverlay,
+    loadingOverlayComponentParams: {
+      loadingMessage: "Cargando...",
+    },
+
     localeText: {
       page: "Página",
       more: "Más",
@@ -115,6 +157,22 @@
   async function loadData(silent = false) {
     const url = buildURL();
 
+    // Mostrar loader solo si NO es silent
+    if (!silent) {
+      if (window.LoaderManager) {
+        LoaderManager.show("Filtrando horas semanales...");
+      } else {
+        try {
+          gridApi.showLoadingOverlay();
+        } catch (_) {
+        } finally {
+          if (!silent && window.LoaderManager) {
+            LoaderManager.hide();
+          }
+        }
+      }
+    }
+
     try {
       const response = await fetch(url, { cache: "no-store" });
 
@@ -143,6 +201,13 @@
         gridApi.setGridOption("rowData", rows);
         lastDataSignature = currentSignature;
 
+        // Si no hay datos, mostrar overlay de "sin datos"
+        if (rows.length === 0) {
+          gridApi.showNoRowsOverlay();
+        } else {
+          gridApi.hideOverlay();
+        }
+
         setTimeout(() => {
           gridApi.sizeColumnsToFit();
         }, 100);
@@ -151,6 +216,11 @@
       console.error("Error al cargar datos semanales:", error);
       if (!silent) {
         gridApi.setGridOption("rowData", []);
+        gridApi.showNoRowsOverlay();
+      }
+    } finally {
+      if (!silent) {
+        LoaderManager.hide();
       }
     }
   }
