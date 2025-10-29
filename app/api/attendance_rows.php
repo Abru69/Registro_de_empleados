@@ -23,20 +23,19 @@ foreach ($registros as $r) {
   if ($minTrab !== null) $totalesPorEmpleado[$r['nombre']] += $minTrab;
 
   $rowsHtml .= '<tr>'
-             . '<td>'.htmlspecialchars($r['nombre']).'</td>'
-             . '<td>'.htmlspecialchars($r['fecha']).'</td>'
-             . '<td>'.htmlspecialchars($r['hora']).'</td>'
-             . '<td>'.htmlspecialchars($r['hora_salida'] ?? '---').'</td>'
-             . '<td>'.($minTrab !== null ? formatHHMM($minTrab) : '---').'</td>'
-             . '</tr>';
+    . '<td>' . htmlspecialchars($r['nombre']) . '</td>'
+    . '<td>' . htmlspecialchars($r['fecha']) . '</td>'
+    . '<td>' . htmlspecialchars($r['hora']) . '</td>'
+    . '<td>' . htmlspecialchars($r['hora_salida'] ?? '---') . '</td>'
+    . '<td>' . ($minTrab !== null ? formatHHMM($minTrab) : '---') . '</td>'
+    . '</tr>';
 }
 
-// (Opcional) Tabla de resumen por empleado
 $totalsHtml = '';
 if (!empty($totalesPorEmpleado)) {
-  $totalsHtml .= '<div class="tabla-scroll"><table><thead><tr><th>Empleado</th><th>Total de horas</th></tr></thead><tbody>';
+  $totalsHtml .= '<div class="tabla-scroll"><table><thead><tr><th>Empleado</th><th>Total acumuladas por semana</th></tr></thead><tbody>';
   foreach ($totalesPorEmpleado as $emp => $minTotal) {
-    $totalsHtml .= '<tr><td>'.htmlspecialchars($emp).'</td><td>'.formatHHMM($minTotal).'</td></tr>';
+    $totalsHtml .= '<tr><td>' . htmlspecialchars($emp) . '</td><td>' . formatHHMM($minTotal) . '</td></tr>';
   }
   $totalsHtml .= '</tbody></table></div>';
 }
@@ -47,5 +46,5 @@ $sig = md5(json_encode($registros));
 echo json_encode([
   'sig'        => $sig,
   'rows_html'  => $rowsHtml,
-  'totals_html'=> $totalsHtml
+  'totals_html' => $totalsHtml
 ]);

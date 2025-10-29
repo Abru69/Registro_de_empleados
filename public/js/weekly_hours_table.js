@@ -1,65 +1,57 @@
 (function () {
-  // Referencias a elementos del DOM
-  const inpDesde = document.getElementById("filterDesde");
-  const inpHasta = document.getElementById("filterHasta");
-  const inpNombre = document.getElementById("filterNombre");
-  const btnFiltrar = document.getElementById("btnFiltrar");
-  const btnMostrar = document.getElementById("btnMostrarTodo");
-  const btnExportar = document.getElementById("btnExportar");
+  const inpNombre = document.getElementById("filterNombreSemanal");
+  const inpSemana = document.getElementById("filterSemana");
+  const btnFiltrar = document.getElementById("btnFiltrarSemanal");
+  const btnMostrar = document.getElementById("btnMostrarTodoSemanal");
+  const btnExportar = document.getElementById("btnExportarSemanal");
 
-  // Variable para controlar el auto-refresh
   let autoRefreshInterval = null;
   let lastDataSignature = null;
 
-  // Configuración de columnas de AG-Grid (SIN floating filters)
   const columnDefs = [
     {
       field: "nombre",
-      headerName: "Nombre del Empleado",
-      filter: "agTextColumnFilter",
-      floatingFilter: false,
+      headerName: "Empleado",
       flex: 2,
       minWidth: 180,
+      pinned: "left",
     },
     {
-      field: "fecha",
-      headerName: "Fecha",
-      filter: "agDateColumnFilter",
-      floatingFilter: false,
-      flex: 1,
-      minWidth: 130,
-      filterParams: {
-        comparator: (filterDate, cellValue) => {
-          if (!cellValue) return -1;
-          const cellDate = new Date(cellValue);
-          if (cellDate < filterDate) return -1;
-          if (cellDate > filterDate) return 1;
-          return 0;
-        },
-      },
-    },
-    {
-      field: "hora",
-      headerName: "Hora Entrada",
+      field: "semana_iso",
+      headerName: "Semana",
       flex: 1,
       minWidth: 120,
     },
     {
-      field: "hora_salida",
-      headerName: "Hora Salida",
-      flex: 1,
-      minWidth: 120,
-      valueFormatter: (params) => params.value || "Sin salida",
+      field: "fecha_inicio",
+      headerName: "Inicio (Lunes)",
+      flex: 1.2,
+      minWidth: 130,
     },
     {
-      field: "total_hhmm",
-      headerName: "Total de Horas",
-      flex: 1,
+      field: "fecha_fin",
+      headerName: "Fin (Domingo)",
+      flex: 1.2,
       minWidth: 130,
+    },
+    {
+      field: "total_registros",
+      headerName: "Días Trabajados",
+      flex: 1,
+      minWidth: 140,
+      cellStyle: { textAlign: "center" },
+    },
+    {
+      field: "total_horas_decimal",
+      headerName: "Total por semana",
+      flex: 1.5,
+      minWidth: 150,
+      valueFormatter: (params) =>
+        params.value ? params.value.toFixed(2) + " hrs" : "0.00 hrs",
+      cellStyle: { fontWeight: "bold", color: "#28a745", fontSize: "15px" },
     },
   ];
 
-  // Configuración general del grid
   const gridOptions = {
     columnDefs: columnDefs,
     defaultColDef: {
@@ -83,18 +75,8 @@
       first: "Primero",
       previous: "Anterior",
       loadingOoo: "Cargando...",
-      noRowsToShow: "No hay registros para mostrar",
-      filterOoo: "Filtrar...",
-      searchOoo: "Buscar...",
-      selectAll: "Seleccionar todo",
-      equals: "Igual",
-      notEqual: "Diferente",
-      lessThan: "Menor que",
-      greaterThan: "Mayor que",
-      contains: "Contiene",
-      notContains: "No contiene",
-      startsWith: "Comienza con",
-      endsWith: "Termina con",
+      noRowsToShow:
+        "No hay datos suficientes para mostrar. Espera que cumplas con la primera semana",
     },
     onGridReady: (params) => {
       params.api.sizeColumnsToFit();
@@ -104,35 +86,32 @@
     },
   };
 
-  // Inicializar AG-Grid
-  const gridDiv = document.querySelector("#myGrid");
+  const gridDiv = document.querySelector("#weeklyGrid");
+  if (!gridDiv) {
+    console.error("No se encontró el elemento #weeklyGrid");
+    return;
+  }
+
   const gridApi = agGrid.createGrid(gridDiv, gridOptions);
 
-  // Función para construir URL con parámetros de filtro
   function buildURL() {
-    const base = "../api/attendance_list.php";
+    const base = "../../app/api/weekly_hours.php";
     const q = new URLSearchParams();
 
-    if (inpDesde?.value) q.set("desde", inpDesde.value);
-    if (inpHasta?.value) q.set("hasta", inpHasta.value);
     if (inpNombre?.value) q.set("nombre", inpNombre.value.trim());
+    if (inpSemana?.value) q.set("semana", inpSemana.value);
 
     const qs = q.toString();
     return qs ? `${base}?${qs}` : base;
   }
 
-  // Función para generar firma de datos (para detectar cambios)
   function generateSignature(data) {
     if (!data || !Array.isArray(data)) return null;
     return JSON.stringify(
-      data.map(
-        (row) =>
-          `${row.id}-${row.nombre}-${row.fecha}-${row.hora}-${row.hora_salida}-${row.total_hhmm}`
-      )
+      data.map((row) => `${row.nombre}-${row.semana_iso}-${row.total_minutos}`)
     );
   }
 
-  // Función para cargar datos en el grid con AJAX
   async function loadData(silent = false) {
     const url = buildURL();
 
@@ -140,23 +119,26 @@
       const response = await fetch(url, { cache: "no-store" });
 
       if (!response.ok) {
-        throw new Error("Error en la respuesta del servidor");
+        const errorText = await response.text();
+        console.error("Error del servidor:", errorText);
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
       }
 
       const json = await response.json();
 
       if (json.error) {
         console.error("Error del servidor:", json.message);
+        alert(
+          `Error: ${json.message}\nArchivo: ${json.file}\nLínea: ${json.line}`
+        );
         gridApi.setGridOption("rowData", []);
         return;
       }
 
       const rows = json.data || [];
 
-      // Generar firma de los datos actuales
       const currentSignature = generateSignature(rows);
 
-      // Solo actualizar si los datos cambiaron (evita parpadeos innecesarios)
       if (!silent || lastDataSignature !== currentSignature) {
         gridApi.setGridOption("rowData", rows);
         lastDataSignature = currentSignature;
@@ -166,26 +148,23 @@
         }, 100);
       }
     } catch (error) {
-      console.error("Error al cargar datos:", error);
+      console.error("Error al cargar datos semanales:", error);
       if (!silent) {
         gridApi.setGridOption("rowData", []);
       }
     }
   }
 
-  // Función para iniciar el auto-refresh (cada 5 segundos)
   function startAutoRefresh() {
     if (autoRefreshInterval) {
       clearInterval(autoRefreshInterval);
     }
 
-    // Actualizar cada 5 segundos (modo silencioso para no interrumpir al usuario)
     autoRefreshInterval = setInterval(() => {
       loadData(true);
-    }, 5000);
+    }, 10000);
   }
 
-  // Función para detener el auto-refresh
   function stopAutoRefresh() {
     if (autoRefreshInterval) {
       clearInterval(autoRefreshInterval);
@@ -193,7 +172,6 @@
     }
   }
 
-  // Event listeners para filtros
   if (btnFiltrar) {
     btnFiltrar.addEventListener("click", () => {
       loadData(false);
@@ -204,28 +182,25 @@
 
   if (btnMostrar) {
     btnMostrar.addEventListener("click", () => {
-      if (inpDesde) inpDesde.value = "";
-      if (inpHasta) inpHasta.value = "";
       if (inpNombre) inpNombre.value = "";
+      if (inpSemana) inpSemana.value = "";
       loadData(false);
       stopAutoRefresh();
       startAutoRefresh();
     });
   }
 
-  // Exportar a CSV
   if (btnExportar) {
     btnExportar.addEventListener("click", () => {
       gridApi.exportDataAsCsv({
-        fileName: `asistencia_empleados_${
+        fileName: `horas_semanales_${
           new Date().toISOString().split("T")[0]
         }.csv`,
       });
     });
   }
 
-  // Permitir filtrar con Enter
-  [inpDesde, inpHasta, inpNombre].forEach((input) => {
+  [inpNombre, inpSemana].forEach((input) => {
     if (input) {
       input.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
@@ -237,14 +212,12 @@
     }
   });
 
-  // Reajustar columnas cuando cambia el tamaño de la ventana
   window.addEventListener("resize", () => {
     if (gridApi) {
       gridApi.sizeColumnsToFit();
     }
   });
 
-  // Detener auto-refresh cuando el usuario cambia de pestaña (optimización)
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
       stopAutoRefresh();
@@ -254,11 +227,9 @@
     }
   });
 
-  // Cargar datos iniciales e iniciar auto-refresh
   loadData(false);
   startAutoRefresh();
 
-  // Limpiar intervalo cuando se cierra la página
   window.addEventListener("beforeunload", () => {
     stopAutoRefresh();
   });
