@@ -1,0 +1,137 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  padding: 10px;
+  padding: 7%;
+}
+.dashboard-container {
+  max-width: 98%; /* Más ancho - usa casi toda la pantalla */
+  margin: 0 auto;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+h1 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: clamp(1.2rem, 2.5vw, 2rem); /* Responsive */
+}
+.filter-section {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+.filter-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+.filter-input {
+  display: flex;
+  flex-direction: column;
+}
+.filter-input label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #555;
+  font-size: 14px;
+}
+.filter-input input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+.filter-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap; /* Para móviles */
+}
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+.btn-danger:hover {
+  background-color: #c82333;
+}
+#myGrid {
+  height: 650px; /* Aumentado */
+  width: 100%;
+  margin-top: 20px;
+}
+.logout-btn {
+  float: right;
+}
+
+/* Responsividad para tablets y móviles */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 10px;
+    max-width: 100%;
+  }
+  h1 {
+    font-size: 1.3rem;
+  }
+  .logout-btn {
+    float: none;
+    display: block;
+    margin-top: 10px;
+  }
+  .filter-group {
+    grid-template-columns: 1fr;
+  }
+  .filter-buttons {
+    flex-direction: column;
+  }
+  .btn {
+    width: 100%;
+  }
+  #myGrid {
+    height: 500px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 5px;
+    padding-top: 30%;
+  }
+  .dashboard-container {
+    padding: 8px;
+    border-radius: 5px;
+  }
+  #myGrid {
+    height: 400px;
+  }
+}

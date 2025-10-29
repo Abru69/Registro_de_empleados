@@ -21,6 +21,7 @@ header('Expires: 0');
     <title>Iniciar Sesión</title>
     <link rel="stylesheet" href="../../public/css/estilos.css" />
     <link rel="stylesheet" href="../../public/css/navbar.css">
+    <link rel="icon" type="image/x-icon" href="../../public/img/favicon.ico">
 
   </head>
   <body>
@@ -54,7 +55,7 @@ header('Expires: 0');
         <input
           type="password"
           name="password"
-          
+         
           placeholder="Contraseña"
           required
         />
