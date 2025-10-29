@@ -17,17 +17,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   // --- LÓGICA DE ENTRADA ---
   if ($accion === 'entrada') {
-    // 1. Verificar si ya existe una entrada hoy
-    $stmt = $conn->prepare("SELECT id FROM registros WHERE nombre = ? AND fecha = ?");
+    // Verificar si hay un registro sin hora de salida
+    $stmt = $conn->prepare("SELECT id FROM registros 
+                           WHERE nombre = ? 
+                           AND fecha = ? 
+                           AND hora_salida IS NULL");
     $stmt->execute([$nombre, $fecha]);
     
     if ($stmt->fetch()) {
-      // Si fetch() encuentra un registro, ya existe
-      echo json_encode(['status' => 'error', 'mensaje' => 'Ya has registrado tu ENTRADA hoy']);
+      echo json_encode([
+        'status' => 'error', 
+        'mensaje' => 'Debes registrar tu SALIDA antes de una nueva ENTRADA'
+      ]);
       exit;
     }
 
-    // 2. Si no existe, insertar el nuevo registro
+    // Si no hay registros pendientes, crear nuevo registro
     $stmt = $conn->prepare("INSERT INTO registros (nombre, fecha, hora) VALUES (?, ?, ?)");
     $stmt->execute([$nombre, $fecha, $hora]);
 
@@ -35,25 +40,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   
   // --- LÓGICA DE SALIDA ---
   } elseif ($accion === 'salida') {
-    
-    // 1. Buscar el registro de entrada de hoy
-    $stmt = $conn->prepare("SELECT id, hora_salida FROM registros WHERE nombre = ? AND fecha = ?");
+    // Buscar el último registro sin hora de salida
+    $stmt = $conn->prepare("SELECT id, hora 
+                           FROM registros 
+                           WHERE nombre = ? 
+                           AND fecha = ? 
+                           AND hora_salida IS NULL 
+                           ORDER BY hora DESC 
+                           LIMIT 1");
     $stmt->execute([$nombre, $fecha]);
     $registro = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$registro) {
-      // No se encontró registro de entrada
-      echo json_encode(['status' => 'error', 'mensaje' => 'No puedes registrar SALIDA si no registraste ENTRADA hoy']);
+      echo json_encode([
+        'status' => 'error', 
+        'mensaje' => 'No hay una ENTRADA activa para registrar SALIDA'
+      ]);
       exit;
     }
 
-    // 2. Verificar si ya registró la salida
-    if ($registro['hora_salida'] !== null) {
-      echo json_encode(['status' => 'error', 'mensaje' => 'Ya has registrado tu SALIDA hoy']);
+    // Validar que la hora de salida sea posterior a la entrada
+    $horaEntrada = strtotime($registro['hora']);
+    $horaSalida = strtotime($hora);
+    
+    if ($horaSalida <= $horaEntrada) {
+      echo json_encode([
+        'status' => 'error', 
+        'mensaje' => 'La hora de SALIDA debe ser posterior a la hora de ENTRADA'
+      ]);
       exit;
     }
 
-    // 3. Si todo está bien, actualizar la hora_salida
+    // Actualizar la hora de salida
     $stmt = $conn->prepare("UPDATE registros SET hora_salida = ? WHERE id = ?");
     $stmt->execute([$hora, $registro['id']]);
 
