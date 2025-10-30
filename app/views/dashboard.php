@@ -94,7 +94,7 @@ try {
 
   <div class="panel">
     <div class="dashboard-container">
-      <h2>📋 Registros de Asistencia</h2>
+      <h2 id="centrar">Registros de Asistencia</h2>
       <div class="filter-section">
         <h3>Filtros de Búsqueda</h3>
         <div class="filter-group">
@@ -123,6 +123,7 @@ try {
 
 
       <div id="tab-semanales" class="tab-content">
+        <h2 id="centrar">Tabla de Horas Semanales</h2>
         <div class="filter-section">
           <h3>Filtros de Búsqueda</h3>
           <div class="filter-group">
@@ -169,7 +170,6 @@ try {
 
         <div id=" probe" data-url="../api/attendance_rows.php<?= $filtro ? '?fecha=' . urlencode($filtro) : '' ?>"></div>
         <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.3/dist/ag-grid-community.min.js"></script>
-        
         <script src="../../public/js/loader.js" defer></script>
         <script src="../../public/js/navbar.js" defer></script>
         <script src="../../public/js/attendance_poll.js" defer></script>

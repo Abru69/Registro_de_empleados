@@ -33,7 +33,7 @@
       this.eGui = document.createElement("div");
       this.eGui.innerHTML = `
                 <div class="ag-overlay-no-rows-center">
-                    <span class="custom-no-data-icon">📋</span>
+                    <span class="custom-no-data-icon"></span>
                     <div class="custom-no-data-message">
                         ${params.noRowsMessageFunc()}
                     </div>
@@ -304,6 +304,94 @@
       });
     }
   });
+
+  // Limitar calendarios: no permitir futuro
+  (function setTodayMax() {
+    const today = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    const iso = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(
+      today.getDate()
+    )}`;
+    if (inpDesde) inpDesde.max = iso;
+    if (inpHasta) inpHasta.max = iso;
+  })();
+
+  function clearDateErrors() {
+    [inpDesde, inpHasta].forEach((el) => {
+      el.classList.remove("is-invalid");
+      el.title = "";
+      el.setCustomValidity("");
+    });
+  }
+
+  function markInvalid(el, msg) {
+    el.classList.add("is-invalid");
+    el.title = msg;
+    el.setCustomValidity(msg);
+    el.reportValidity();
+  }
+
+  // Valida permitiendo igualdad (Desde <= Hasta) y bloqueando futuro
+  function validateDateFilters() {
+    clearDateErrors();
+
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    const desdeValue = inpDesde.value ? new Date(inpDesde.value) : null;
+    const hastaValue = inpHasta.value ? new Date(inpHasta.value) : null;
+
+    // Si falta alguno, no validamos todavía
+    if (!desdeValue || !hastaValue) return true;
+
+    // === EXCEPCIÓN: igualdad permitida ===
+    // Solo marcamos error si Desde > Hasta
+    if (desdeValue.getTime() > hastaValue.getTime()) {
+      markInvalid(
+        inpDesde,
+        "La fecha 'Desde' no puede ser posterior a la fecha 'Hasta'."
+      );
+      return false;
+    }
+
+    // No permitir fechas futuras
+    if (desdeValue > hoy) {
+      markInvalid(
+        inpDesde,
+        "La fecha 'Desde' no puede ser posterior a la fecha actual."
+      );
+      return false;
+    }
+    if (hastaValue > hoy) {
+      markInvalid(
+        inpHasta,
+        "La fecha 'Hasta' no puede ser posterior a la fecha actual."
+      );
+      return false;
+    }
+    
+    // Ajustar límites
+    inpHasta.min = inpDesde.value; 
+    inpDesde.max = inpHasta.value; 
+
+    return true;
+  }
+
+  // Eventos
+  inpDesde.addEventListener("change", validateDateFilters);
+  inpHasta.addEventListener("change", validateDateFilters);
+
+  // Si tienes botón Buscar
+  const btnBuscar = document.getElementById("btnBuscar");
+  if (btnBuscar) {
+    btnBuscar.addEventListener("click", (e) => {
+      if (!validateDateFilters()) {
+        e.preventDefault();
+        return;
+      }
+      loadData(false); // tu función existente
+    });
+  }
 
   // Reajustar columnas cuando cambia el tamaño de la ventana
   window.addEventListener("resize", () => {
