@@ -4,8 +4,16 @@ date_default_timezone_set('America/Mexico_City');
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $nombre = trim($_POST['nombre'] ?? '');
+  $nombre = strtolower(trim($_POST['nombre'] ?? ''));
   $accion = $_POST['accion'] ?? '';
+
+  if (!preg_match('/^[a-záéíóúñ]+$/u', $nombre)) {
+    echo json_encode([
+      'status' => 'error',
+      'mensaje' => 'El nombre solo puede contener letras, sin números ni caracteres especiales'
+    ]);
+    exit;
+  }
   
   if ($nombre === '') {
     echo json_encode(['status' => 'error', 'mensaje' => 'Debe ingresar su nombre']);
@@ -23,10 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                            AND fecha = ? 
                            AND hora_salida IS NULL");
     $stmt->execute([$nombre, $fecha]);
-    
+
     if ($stmt->fetch()) {
       echo json_encode([
-        'status' => 'error', 
+        'status' => 'error',
         'mensaje' => 'Debes registrar tu SALIDA antes de una nueva ENTRADA'
       ]);
       exit;
@@ -37,8 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([$nombre, $fecha, $hora]);
 
     echo json_encode(['status' => 'ok', 'mensaje' => "Entrada registrada a las $hora"]);
-  
-  // --- LÓGICA DE SALIDA ---
+
+    // --- LÓGICA DE SALIDA ---
   } elseif ($accion === 'salida') {
     // Buscar el último registro sin hora de salida
     $stmt = $conn->prepare("SELECT id, hora 
@@ -53,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$registro) {
       echo json_encode([
-        'status' => 'error', 
+        'status' => 'error',
         'mensaje' => 'No hay una ENTRADA activa para registrar SALIDA'
       ]);
       exit;
@@ -62,10 +70,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validar que la hora de salida sea posterior a la entrada
     $horaEntrada = strtotime($registro['hora']);
     $horaSalida = strtotime($hora);
-    
+
     if ($horaSalida <= $horaEntrada) {
       echo json_encode([
-        'status' => 'error', 
+        'status' => 'error',
         'mensaje' => 'La hora de SALIDA debe ser posterior a la hora de ENTRADA'
       ]);
       exit;
@@ -76,9 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([$hora, $registro['id']]);
 
     echo json_encode(['status' => 'ok', 'mensaje' => "Salida registrada a las $hora"]);
-
   } else {
     echo json_encode(['status' => 'error', 'mensaje' => 'Acción no válida']);
   }
 }
-?>

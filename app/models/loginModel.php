@@ -11,6 +11,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['usuario'])) {
         $_SESSION['mensaje'] = "Ya tienes una sesión activa como '{$_SESSION['usuario']}'. Cierra sesión para cambiar de usuario.";
         header("Location: ../views/dashboard.php");
         exit;
+    } elseif (!preg_match('/^[a-záéíóúñ]+$/u', $usuarioPost)) {
+        $_SESSION['mensaje'] = "El nombre de usuario solo puede contener letras minúsculas y caracteres especiales en español.";
+        header("Location: ../views/login.php");
+        exit;
     } elseif ($usuarioPost === $_SESSION['usuario']) {
         // Si es el mismo usuario, simplemente redirige al dashboard
         header("Location: ../views/dashboard.php");
