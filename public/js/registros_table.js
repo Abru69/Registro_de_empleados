@@ -264,66 +264,20 @@
   // Event listeners para filtros
   if (btnFiltrar) {
     btnFiltrar.addEventListener("click", () => {
-      if (!validateDateFilters()) return;
       loadData(false);
       stopAutoRefresh();
       startAutoRefresh();
     });
-  }
-
-  // Función para resetear límites de los datepickers
-  function resetDatePickerLimits() {
-    const today = new Date();
-    const pad = (n) => String(n).padStart(2, "0");
-    const todayISO = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(
-      today.getDate()
-    )}`;
-
-    // Eventos de validación
-    if (inpDesde) {
-      inpDesde.addEventListener("change", validateDateFilters);
-
-      // Detectar cuando el usuario limpia el campo manualmente
-      inpDesde.addEventListener("input", (e) => {
-        if (!e.target.value) {
-          resetDatePickerLimits();
-          clearDateErrors();
-        }
-      });
-    }
-
-    if (inpHasta) {
-      inpHasta.addEventListener("change", validateDateFilters);
-      // Detectar cuando el usuario limpia el campo manualmente
-      inpHasta.addEventListener("input", (e) => {
-        if (!e.target.value) {
-          resetDatePickerLimits();
-          clearDateErrors();
-        }
-      });
-    }
   }
 
   if (btnMostrar) {
     btnMostrar.addEventListener("click", () => {
+      if (inpDesde) inpDesde.value = "";
+      if (inpHasta) inpHasta.value = "";
       if (inpNombre) inpNombre.value = "";
-
-      resetDatePickerLimits();
-      clearDateErrors();
-
       loadData(false);
       stopAutoRefresh();
       startAutoRefresh();
-    });
-  }
-
-  if (inpDesde) {
-    inpDesde.addEventListener("input", (e) => {
-      // Si el campo queda vacío (usuario borró la fecha)
-      if (!e.target.value) {
-        resetDatePickerLimits();
-        clearDateErrors();
-      }
     });
   }
 
@@ -380,14 +334,17 @@
   // Valida permitiendo igualdad (Desde <= Hasta) y bloqueando futuro
   function validateDateFilters() {
     clearDateErrors();
+
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
+
     const desdeValue = inpDesde.value ? new Date(inpDesde.value) : null;
     const hastaValue = inpHasta.value ? new Date(inpHasta.value) : null;
 
     // Si falta alguno, no validamos todavía
     if (!desdeValue || !hastaValue) return true;
 
+    // === EXCEPCIÓN: igualdad permitida ===
     // Solo marcamos error si Desde > Hasta
     if (desdeValue.getTime() > hastaValue.getTime()) {
       markInvalid(
@@ -405,7 +362,6 @@
       );
       return false;
     }
-
     if (hastaValue > hoy) {
       markInvalid(
         inpHasta,
@@ -413,10 +369,10 @@
       );
       return false;
     }
-
-    // Ajustar límites dinámicos SOLO cuando ambas fechas son válidas
-    inpHasta.min = inpDesde.value;
-    inpDesde.max = inpHasta.value;
+    
+    // Ajustar límites
+    inpHasta.min = inpDesde.value; 
+    inpDesde.max = inpHasta.value; 
 
     return true;
   }
