@@ -60,6 +60,8 @@ if (session_status() === PHP_SESSION_NONE) {
     <p id="mensaje"></p>
     <p id="hora-actual"></p>
   </div>
+  
+  <!--   INSERT INTO usuarios (usuario, password) VALUES ('admin', SHA2('tu_contraseña_aqui', 256)); -->
 
   <script src="public/js/navbar.js" defer></script>
   <script src="app/controllers/empleadosController.js"></script>
