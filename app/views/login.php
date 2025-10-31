@@ -51,12 +51,12 @@ header('Expires: 0');
         type="text"
         name="usuario"
         placeholder="Usuario"
-        value="admin"
+
         required />
       <input
         type="password"
         name="password"
-        value="sudo"
+
         placeholder="Contraseña"
         required />
       <?php

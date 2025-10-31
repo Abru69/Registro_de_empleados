@@ -80,7 +80,7 @@ try {
 
           <?php if (!empty($_SESSION['rol']) && $_SESSION['rol'] === 'admin'): ?>
             <a href="../../index.php"
-              class="navbar-link <?= $currentPage === 'index.php' ? 'active' : ''; ?>">Registrar Empleado</a>
+              class="navbar-link <?= $currentPage === 'index.php' ? 'active' : ''; ?>">Registro de Asistencia</a>
           <?php endif; ?>
 
           <a href="../models/logout.php" class="navbar-link logout-btn">Cerrar Sesión</a>
