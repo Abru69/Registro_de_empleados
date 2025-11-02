@@ -82,8 +82,37 @@
       headerName: "Total por semana",
       flex: 1.5,
       minWidth: 150,
-      valueFormatter: (params) =>
-        params.value ? params.value.toFixed(2) + " hrs" : "0.00 hrs",
+      valueFormatter: (params) => {
+        // Prefer `total_minutos` (returned by the API) for precise H:MM formatting.
+        const data = params.data || {};
+        const minutos = data.total_minutos;
+
+        function formatMinutesToHMM(totalMin) {
+          if (totalMin === null || totalMin === undefined) return "0:00 (0 horas con 0 minutos)";
+          const m = Number(totalMin);
+          if (Number.isNaN(m) || m <= 0) return "0:00 (0 horas con 0 minutos)";
+          const h = Math.floor(m / 60);
+          const mm = m % 60;
+          const minutosStr = mm.toString().padStart(2, "0");
+          const horasTexto = h === 1 ? "1 hora" : `${h} horas`;
+          const minutosTexto = mm === 1 ? "1 minuto" : `${mm} minutos`;
+          return `${h}:${minutosStr} (${horasTexto} con ${minutosTexto})`;
+        }
+
+        // If total_minutos is present use it; otherwise fall back to decimal value
+        if (minutos !== null && minutos !== undefined) {
+          return formatMinutesToHMM(minutos);
+        }
+
+        const decimalVal = params.value;
+        if (decimalVal || decimalVal === 0) {
+          // convert decimal hours (e.g., 7.5) to minutes
+          const totalMin = Math.round(Number(decimalVal) * 60);
+          return formatMinutesToHMM(totalMin);
+        }
+
+        return "0:00 (0 horas con 0 minutos)";
+      },
       cellStyle: { fontWeight: "bold", color: "#28a745", fontSize: "15px" },
     },
   ];
