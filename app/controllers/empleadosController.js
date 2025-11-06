@@ -1,4 +1,3 @@
-// Registro de Entrada/Salida - Main JavaScript
 document.addEventListener("DOMContentLoaded", () => {
   const btnEntrada = document.getElementById("btnEntrada");
   const btnSalida = document.getElementById("btnSalida");
@@ -13,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
-      hour12: false,
+      hour12: true,
     };
     horaActual.textContent = `Hora actual: ${ahora.toLocaleTimeString(
       "es-MX",
