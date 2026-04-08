@@ -1,22 +1,20 @@
-const sqlite3 = require('sqlite3');
-const { open } = require('sqlite');
-const path = require('path');
+const { Pool } = require('pg');
+require('dotenv').config();
 
-let dbPromise = null;
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || 'postgresql://localhost/registros_db',
+  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('localhost') ? false : { rejectUnauthorized: false }
+});
 
-async function query(sql, params = []) {
-  if (!dbPromise) {
-    dbPromise = open({ filename: path.join(__dirname, 'database.sqlite'), driver: sqlite3.Database });
-  }
-  const db = await dbPromise;
-  
-  if (sql.trim().toUpperCase().startsWith('SELECT')) {
-    const rows = await db.all(sql, params);
-    return [rows];
-  } else {
-    const result = await db.run(sql, params);
-    return [result];
+async function query(text, params = []) {
+  try {
+    const res = await pool.query(text, params);
+    // Para mantener retrocompatibilidad con el formato esperado [rows]
+    return [res.rows]; 
+  } catch (err) {
+    console.error('Database Query Error:', err);
+    throw err;
   }
 }
 
-module.exports = { query };
+module.exports = { query, pool };

@@ -8,6 +8,7 @@ export interface User {
   usuario: string;
   rol: string;
   user_id: number;
+  token?: string;
 }
 
 export interface LoginResponse {
@@ -16,6 +17,7 @@ export interface LoginResponse {
   usuario?: string;
   rol?: string;
   user_id?: number;
+  token?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -52,15 +54,14 @@ export class AuthService {
     formData.append('usuario', usuario);
     formData.append('password', password);
 
-    return this.http.post<LoginResponse>(`${this.apiUrl}/api/login`, formData, {
-      withCredentials: true
-    }).pipe(
+    return this.http.post<LoginResponse>(`${this.apiUrl}/api/login`, formData).pipe(
       tap(response => {
-        if (response.status === 'ok' && response.usuario) {
+        if (response.status === 'ok' && response.usuario && response.token) {
           const user: User = {
             usuario: response.usuario,
             rol: response.rol || 'user',
-            user_id: response.user_id || 0
+            user_id: response.user_id || 0,
+            token: response.token
           };
           localStorage.setItem('currentUser', JSON.stringify(user));
           this.currentUserSubject.next(user);
@@ -70,9 +71,7 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/api/logout`, {
-      withCredentials: true
-    }).pipe(
+    return this.http.get(`${this.apiUrl}/api/logout`).pipe(
       tap(() => {
         localStorage.removeItem('currentUser');
         this.currentUserSubject.next(null);
